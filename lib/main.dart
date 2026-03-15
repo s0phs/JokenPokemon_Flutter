@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import 'dart:math';
+
+
 void main(){
   runApp(JokenPokemonApp());
 }
@@ -43,19 +46,40 @@ class _HomeScreenState extends State<HomeScreen> {
   Pokemon? computerChoice = null;
   String result = "";
   
+  String getResult(Pokemon player, Pokemon computer) {
+    if (player.name == computer.name) {
+      return "Empate!";
+    }
+
+    if ((player.name == "Charmander" && computer.name == "Bulbassaur") ||
+        (player.name == "Bulbassaur" && computer.name == "Squirtle") ||
+        (player.name == "Squirtle" && computer.name == "Charmander")) {
+      return "Você venceu!";
+    }
+
+    return "Computador venceu!";
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.orange[50],
       body: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Padding(padding: const EdgeInsets.all(8.0),child: PokemonLogo()),
-          BattleArena(result: "Teste"),
+          BattleArena(player: playerChoice, computer: computerChoice, result: result),
 
           Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text("Faça sua jogada de mestre"),
+
+              BattleResult(result: result),
+              
+              Text(
+                style: TextStyle(fontWeight: FontWeight.bold),
+                ("Faça sua jogada de mestre") 
+              ),
               SizedBox(height: 8),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -63,7 +87,15 @@ class _HomeScreenState extends State<HomeScreen> {
                   return PokemonOption(
                     selected: playerChoice == p,
                     pokemon: p,
-                    onSelected: (pokemon) {},  
+                    onSelected: (pokemon) {
+                      setState(() {
+                        final random = Random();
+                        playerChoice = pokemon;     
+                        computerChoice = pokemons[random.nextInt(pokemons.length)];
+
+                        result = getResult(playerChoice!, computerChoice!);           
+                      });
+                    },  
                   );
                 }).toList(),
               )
@@ -101,13 +133,13 @@ class BattleArena extends StatelessWidget {
     return Column(
       children: [
         Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             PokemonCard(pokemon: player, playerName: "Você"),
             PokemonCard(pokemon: computer, playerName: "Computador"),
           ],
         ),
-
-        BattleResult(result: result),
+        
       ],
     );
   }
